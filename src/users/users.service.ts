@@ -28,7 +28,7 @@ export class UsersService {
         });
     }
 
-    async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+    async updateById(id: string, data: Prisma.UserUpdateInput): Promise<User> {
         return this.prisma.user.update({
             where: { id },
             data,

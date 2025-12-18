@@ -2,6 +2,7 @@ import { Controller, Put, Body, UseGuards, Request, Get, Param } from '@nestjs/c
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
 import * as bcrypt from 'bcrypt';
+import { GetCurrentUserId } from 'src/common/decorators/getCurrentUserId';
 
 @Controller('users')
 export class UsersController {
@@ -9,15 +10,13 @@ export class UsersController {
 
     @UseGuards(AuthGuard('jwt'))
     @Put('profile')
-    async update(@Request() req: any, @Body() updateDto: any) {
-        const userId = req.user.userId;
-
+    async update(@GetCurrentUserId() userId: string, @Body() updateDto: any) {
         // If password is provided, hash it
         if (updateDto.password) {
             updateDto.password = await bcrypt.hash(updateDto.password, 10);
         }
 
-        return this.usersService.update(userId, updateDto);
+        return this.usersService.updateById(userId, updateDto);
     }
 
     @Get()
@@ -27,8 +26,7 @@ export class UsersController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get('profile')
-    async findOne(@Request() req: any) {
-        console.log(req.user);
-        return this.usersService.findById(req.user.id);
+    async findOne(@GetCurrentUserId() userId: string) {
+        return this.usersService.findById(userId);
     }
 }

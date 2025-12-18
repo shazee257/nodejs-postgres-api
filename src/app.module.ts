@@ -5,6 +5,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ErrorLoggingFilter } from './common/exception-filters/error-logging.filter';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggerInterceptor } from './common/interceptors/logger.Interceptor';
 
 @Module({
   imports: [
@@ -14,6 +16,9 @@ import { ErrorLoggingFilter } from './common/exception-filters/error-logging.fil
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [ErrorLoggingFilter],
+  providers: [
+    ErrorLoggingFilter,
+    { provide: APP_INTERCEPTOR, useClass: LoggerInterceptor },
+  ],
 })
 export class AppModule { }
