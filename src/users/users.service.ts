@@ -6,8 +6,24 @@ import { User, Prisma } from '@prisma/client';
 export class UsersService {
     constructor(private prisma: PrismaService) { }
 
-    async findAll(): Promise<User[]> {
-        return this.prisma.user.findMany();
+    async findAll(search: string, userId: string, page: number = 1, limit: number = 10): Promise<User[]> {
+
+        const whereCondition: Prisma.UserWhereInput = {
+            NOT: { id: userId },
+        }
+
+        if (search) {
+            whereCondition.OR = [
+                { username: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+            ]
+        }
+
+        return this.prisma.user.findMany({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: whereCondition
+        });
     }
 
     async findOne(where: Prisma.UserWhereInput): Promise<User | null> {
@@ -28,7 +44,7 @@ export class UsersService {
         });
     }
 
-    async updateById(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+    async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
         return this.prisma.user.update({
             where: { id },
             data,

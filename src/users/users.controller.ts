@@ -1,4 +1,4 @@
-import { Controller, Put, Body, UseGuards, Request, Get, Param } from '@nestjs/common';
+import { Controller, Put, Body, UseGuards, Request, Get, Param, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
 import * as bcrypt from 'bcrypt';
@@ -16,12 +16,13 @@ export class UsersController {
             updateDto.password = await bcrypt.hash(updateDto.password, 10);
         }
 
-        return this.usersService.updateById(userId, updateDto);
+        return this.usersService.update(userId, updateDto);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get()
-    async findAll() {
-        return this.usersService.findAll();
+    async findAll(@Query('search') search: string, @Query('page') page = 1, @Query('limit') limit = 10, @GetCurrentUserId() userId: string) {
+        return this.usersService.findAll(search, userId, +page, +limit);
     }
 
     @UseGuards(AuthGuard('jwt'))
